@@ -99,6 +99,13 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 				d.width = 1
 			}
 			d.buf.WriteString(strconv.Quote(string(d.input[d.ii:d.width])))
+			d.ii += d.width
+		case 's':
+			if !d.widthValid {
+				d.width = 1
+			}
+			d.buf.WriteString(string(d.input[d.ii:d.width]))
+			d.ii += d.width
 		case 'x':
 			if !d.widthValid {
 				d.width = 4
