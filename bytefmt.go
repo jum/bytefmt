@@ -5,11 +5,12 @@ consume bytes from the byte slice buf passed as an arg. The width part of a
 format verb specifies the number of bytes to consume of an array. The following
 format letters are understood:
 
-	%b	hex dump bytes using encoding/hex.Dump
+	%p	hex dump bytes using encoding/hex.Dump
 	%q  print a go quoted string
 	%s  print a string
 	%d	print a decimal int (max width 8)
 	%x	print hex int (max width 8)
+	%b	print binary int (max width 8)
 
 	The %x and %d formats can be modified to use intel byte order using a
 	leading ´-´ sign in the width field (e.g. %-4d).
@@ -88,7 +89,7 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 		switch c {
 		case '%':
 			d.buf.WriteRune('%')
-		case 'b':
+		case 'p':
 			if !d.widthValid {
 				d.width = 1
 			}
@@ -118,6 +119,12 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 			}
 			x := d.fetchInt()
 			d.buf.WriteString(strconv.FormatInt(x, 10))
+		case 'b':
+			if !d.widthValid {
+				d.width = 4
+			}
+			x := d.fetchInt()
+			d.buf.WriteString(strconv.FormatInt(x, 2))
 		default:
 			d.buf.WriteString("%%UNKOWN%" + string(c))
 		}
