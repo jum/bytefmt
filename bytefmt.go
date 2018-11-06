@@ -91,19 +91,19 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 			d.buf.WriteRune('%')
 		case 'p':
 			if !d.widthValid {
-				d.width = 1
+				d.width = len(d.input) - d.ii
 			}
 			d.buf.WriteString(hex.Dump(d.input[d.ii:d.width]))
 			d.ii += d.width
 		case 'q':
 			if !d.widthValid {
-				d.width = 1
+				d.width = len(d.input) - d.ii
 			}
 			d.buf.WriteString(strconv.Quote(string(d.input[d.ii:d.width])))
 			d.ii += d.width
 		case 's':
 			if !d.widthValid {
-				d.width = 1
+				d.width = len(d.input) - d.ii
 			}
 			d.buf.WriteString(string(d.input[d.ii:d.width]))
 			d.ii += d.width
