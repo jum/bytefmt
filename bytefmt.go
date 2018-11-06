@@ -26,6 +26,11 @@ import (
 	"strconv"
 )
 
+var (
+	// UnknownFormat is suffixed by the unknown format letter
+	UnknownFormat = "%%UNKOWN%"
+)
+
 type dumper struct {
 	input      []byte
 	ii         int
@@ -142,7 +147,7 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 				d.buf.WriteString(strconv.FormatInt(x, 10))
 			}
 		default:
-			d.buf.WriteString("%%UNKOWN%" + string(c))
+			d.buf.WriteString(UnknownFormat + string(c))
 		}
 	}
 }
