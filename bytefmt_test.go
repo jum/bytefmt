@@ -31,3 +31,17 @@ func TestSprintf(t *testing.T) {
 		}
 	}
 }
+
+func TestEnum(t *testing.T) {
+	var enumValues = map[int64]string{
+		1: "One",
+		2: "Two",
+		3: "Three",
+	}
+	res := Sprintf([]byte{0x1, 0x2, 0x3, 0x4}, "%1.0e, %1.0e, %1.0e, %1.0e", enumValues)
+	expected := "One, Two, Three, 4"
+	if res != expected {
+		t.Logf("enum expected %q, res %q", expected, res)
+		t.Fail()
+	}
+}

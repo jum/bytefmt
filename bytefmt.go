@@ -11,6 +11,7 @@ format letters are understood:
 	%d	print a decimal int (max width 8)
 	%x	print hex int (max width 8)
 	%b	print binary int (max width 8)
+	%e	print enumerated type, precision field is argument index
 
 	The %x and %d formats can be modified to use intel byte order using a
 	leading ´-´ sign in the width field (e.g. %-4d).
@@ -125,6 +126,21 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 			}
 			x := d.fetchInt()
 			d.buf.WriteString(strconv.FormatInt(x, 2))
+		case 'e':
+			if !d.widthValid {
+				d.width = 4
+			}
+			x := d.fetchInt()
+			if d.precValid {
+				m := a[d.prec].(map[int64]string)
+				if s, ok := m[x]; ok {
+					d.buf.WriteString(s)
+				} else {
+					d.buf.WriteString(strconv.FormatInt(x, 10))
+				}
+			} else {
+				d.buf.WriteString(strconv.FormatInt(x, 10))
+			}
 		default:
 			d.buf.WriteString("%%UNKOWN%" + string(c))
 		}
