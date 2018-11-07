@@ -45,3 +45,17 @@ func TestEnum(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestTemplate(t *testing.T) {
+	var templates = map[int64]string{
+		1: "%1x",
+		2: "%1d",
+		3: "%1b",
+	}
+	res := Sprintf([]byte{0x1, 0xee, 0x2, 0xaa, 0x3, 0x55, 0x4}, "%1.0t, %1.0t, %1.0t, %1.0t%p", templates)
+	expected := "ee, 170, 1010101, 4"
+	if res != expected {
+		t.Logf("enum expected %q, res %q", expected, res)
+		t.Fail()
+	}
+}

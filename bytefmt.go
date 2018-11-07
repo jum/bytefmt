@@ -12,6 +12,7 @@ format letters are understood:
 	%x	print hex int (max width 8)
 	%b	print binary int (max width 8)
 	%e	print enumerated type, precision field is argument index
+	%t	template map, width is length of int, prec is argument index
 
 	The %x and %d formats can be modified to use intel byte order using a
 	leading ´-´ sign in the width field (e.g. %-4d).
@@ -39,12 +40,12 @@ type dumper struct {
 	width      int
 	widthValid bool
 	intel      bool // intel byte order for multibyte ints
+	altFlag    bool
 	buf        bytes.Buffer
 }
 
 // A lot of the logic of this is copied from the fmt package.
-func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
-	d.input = buf
+func (d *dumper) doDump(fmt string, a []interface{}) {
 	end := len(fmt)
 	//formatLoop:
 	for i := 0; i < end; {
@@ -61,10 +62,19 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 		}
 		c := fmt[i]
 		d.intel = false
+		d.altFlag = false
 		d.precValid = false
 		d.widthValid = false
 		d.width = 0
 		d.prec = 0
+		if c == '#' {
+			d.altFlag = true
+			i++
+			if i >= end {
+				break
+			}
+			c = fmt[i]
+		}
 		if c == '-' {
 			d.intel = true
 			i++
@@ -146,6 +156,21 @@ func (d *dumper) doDump(buf []byte, fmt string, a []interface{}) {
 			} else {
 				d.buf.WriteString(strconv.FormatInt(x, 10))
 			}
+		case 't':
+			if !d.widthValid {
+				d.width = 4
+			}
+			x := d.fetchInt()
+			if d.precValid {
+				m := a[d.prec].(map[int64]string)
+				if s, ok := m[x]; ok {
+					d.doDump(s, a)
+				} else {
+					d.buf.WriteString(strconv.FormatInt(x, 10))
+				}
+			} else {
+				d.buf.WriteString(strconv.FormatInt(x, 10))
+			}
 		default:
 			d.buf.WriteString(UnknownFormat + string(c))
 		}
@@ -194,7 +219,8 @@ func tooLarge(x int) bool {
 // Fprintf dumps to the writer w.
 func Fprintf(w io.Writer, buf []byte, fmt string, a ...interface{}) (n int, err error) {
 	var d dumper
-	d.doDump(buf, fmt, a)
+	d.input = buf
+	d.doDump(fmt, a)
 	n, err = w.Write(d.buf.Bytes())
 	return
 }
@@ -207,6 +233,7 @@ func Printf(buf []byte, fmt string, a ...interface{}) (n int, err error) {
 // Sprintf dumps to a string.
 func Sprintf(buf []byte, fmt string, a ...interface{}) string {
 	var d dumper
-	d.doDump(buf, fmt, a)
+	d.input = buf
+	d.doDump(fmt, a)
 	return d.buf.String()
 }
