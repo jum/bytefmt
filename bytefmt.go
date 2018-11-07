@@ -143,6 +143,7 @@ func (d *dumper) doDump(fmt string, a []interface{}) {
 			}
 			x := d.fetchInt()
 			if d.precValid {
+				d.buf.WriteRune('(')
 				m := a[d.prec].(map[int64]string)
 				var needOr = false
 				for bit, s := range m {
@@ -161,6 +162,7 @@ func (d *dumper) doDump(fmt string, a []interface{}) {
 					}
 					d.buf.WriteString(strconv.FormatInt(x, 16))
 				}
+				d.buf.WriteRune(')')
 			} else {
 				d.buf.WriteString(strconv.FormatInt(x, 2))
 			}
