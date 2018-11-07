@@ -69,3 +69,16 @@ func TestScaled(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestFlags(t *testing.T) {
+	var flags = map[int64]string{
+		0x80: "bit7",
+		0x01: "bit0",
+	}
+	res := Sprintf([]byte{0x83}, "%1.0b", flags)
+	expected := "bit7|bit0|2"
+	if res != expected {
+		t.Logf("enum expected %q, res %q", expected, res)
+		t.Fail()
+	}
+}

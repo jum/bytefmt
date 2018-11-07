@@ -10,7 +10,8 @@ format letters are understood:
 	%s  print a string
 	%d	print a decimal int (max width 8)
 	%x	print hex int (max width 8)
-	%b	print binary int (max width 8)
+	%b	print binary int (max width 8). If prec is used, it is an index
+	    for an argument mapping bit values to string names.
 	%e	print enumerated type, precision field is argument index
 	%t	template map, width is length of int, prec is argument index
 	%i	scaled integer, prec is arguemt index of float64 scale factor
@@ -141,7 +142,28 @@ func (d *dumper) doDump(fmt string, a []interface{}) {
 				d.width = 4
 			}
 			x := d.fetchInt()
-			d.buf.WriteString(strconv.FormatInt(x, 2))
+			if d.precValid {
+				m := a[d.prec].(map[int64]string)
+				var needOr = false
+				for bit, s := range m {
+					if x&bit != 0 {
+						if needOr {
+							d.buf.WriteRune('|')
+						}
+						d.buf.WriteString(s)
+						needOr = true
+						x &^= bit
+					}
+				}
+				if x != 0 {
+					if needOr {
+						d.buf.WriteRune('|')
+					}
+					d.buf.WriteString(strconv.FormatInt(x, 16))
+				}
+			} else {
+				d.buf.WriteString(strconv.FormatInt(x, 2))
+			}
 		case 'e':
 			if !d.widthValid {
 				d.width = 4
