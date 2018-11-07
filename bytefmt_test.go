@@ -59,3 +59,13 @@ func TestTemplate(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestScaled(t *testing.T) {
+	var scale = 1e-6
+	res := Sprintf([]byte{0x03, 0x47, 0x3b, 0xc0}, "%4.0i", scale)
+	expected := "55"
+	if res != expected {
+		t.Logf("enum expected %q, res %q", expected, res)
+		t.Fail()
+	}
+}

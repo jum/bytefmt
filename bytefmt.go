@@ -13,6 +13,7 @@ format letters are understood:
 	%b	print binary int (max width 8)
 	%e	print enumerated type, precision field is argument index
 	%t	template map, width is length of int, prec is argument index
+	%i	scaled integer, prec is arguemt index of float64 scale factor
 
 	The %x and %d formats can be modified to use intel byte order using a
 	leading ´-´ sign in the width field (e.g. %-4d).
@@ -171,6 +172,16 @@ func (d *dumper) doDump(fmt string, a []interface{}) {
 			} else {
 				d.buf.WriteString(strconv.FormatInt(x, 10))
 			}
+		case 'i':
+			if !d.widthValid {
+				d.width = 4
+			}
+			x := float64(d.fetchInt())
+			if d.precValid {
+				factor := a[d.prec].(float64)
+				x *= factor
+			}
+			d.buf.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
 		default:
 			d.buf.WriteString(UnknownFormat + string(c))
 		}
