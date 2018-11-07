@@ -160,6 +160,7 @@ func (d *dumper) doDump(fmt string, a []interface{}) {
 					if needOr {
 						d.buf.WriteRune('|')
 					}
+					d.buf.WriteString("0x")
 					d.buf.WriteString(strconv.FormatInt(x, 16))
 				}
 				d.buf.WriteRune(')')
